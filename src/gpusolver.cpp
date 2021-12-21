@@ -2,12 +2,13 @@
 #include "cell.hpp"
 
 // Prototype of host front end 
-void hostFE (float test);
+void hostFE(vector< vector<Cell> > & maze, int height, int width);
 
 GPUSolver::GPUSolver(vector< vector<Cell> > allCells, int height, int width/*, Render & render*/):maze(allCells), height(height), width(width)/*, render(render)*/ {}
 
 GPUSolver::~GPUSolver() {}
 
 void GPUSolver::solve() {
-    hostFE(1.2);
+    // Send matrix to frontend
+    hostFE(maze, height, width);
 }

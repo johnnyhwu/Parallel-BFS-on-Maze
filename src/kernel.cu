@@ -1,35 +1,41 @@
 #include <cuda.h>
+#include <thrust/device_vector.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
+#include <queue>
+#include "cell.hpp"
 
 
-__global__ void bfsKernel(int* d_output, float test) {
+__global__ void bfsKernel(thrust::device_vector< thrust::device_vector<Cell> > & d_maze, float test) {
     int row = threadIdx.x;
 
-    printf("%d %f fef\n", row, test);
-    if (row == 0) {
-        d_output[0] = 15;
-    }
+    int maze_posY = d_maze[0][row].getRowPos;
+    int maze_posX = d_maze[0][row].getColPos;
+
+    printf("Thread: %d Position: %d %d\n", row, maze_posY, maze_posX);
 }
 
-void hostFE (float test) {
-    printf("%f\n", test);
+void hostFE(vector< vector<Cell> > & h_maze, int height, int width) {
+    // printf("height:%d  width:%d\n", height, width);
+    // printf("maze[0][0]: %d", maze[0][0].getRowPos());
 
-    size_t size = sizeof(int)*5;
+    queue<Cell> q;
+    vector<bool> visited(height*width, false);
 
-    int* d_output;
-    int* h_output;
-    cudaMalloc(&d_output, size);
-    h_output = (int*)malloc(size);
+    // visit start point
+    //maze[0][0].setFrom(Cell(0, 0));
+    q.push(h_maze[0][0]);
+    visited[0] = true;
+
+    // Allocating device memory
+    thrust::device_vector< thrust::device_vector<Cell> > d_maze = h_maze;
+
 
     dim3 dimBlock(4, 4);
     dim3 dimGrid(16/4, 16/4);
-    bfsKernel<<<1, 5>>>(d_output, test);
 
-    cudaMemcpy(h_output, d_output, size, cudaMemcpyDeviceToHost);
-    
-    for (int i = 0; i < 5; i++) {
-        printf("%d ", h_output[i]);
-    }
+
+    bfsKernel<<<1, 5>>>(d_maze, 0);
 
 }

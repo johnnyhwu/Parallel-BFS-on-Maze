@@ -22,4 +22,7 @@ public:
 
     void parallelBFS2(unsigned int thread_num);
     static void* parallelBFS2Fn(void* args);
+
+    void parallelBFS3(unsigned int thread_num);
+    void parallelBFS3Fn(void* args, unsigned int thread_num);
 };

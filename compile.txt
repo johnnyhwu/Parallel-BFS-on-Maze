@@ -1,1 +1,0 @@
-g++ -std=c++14 -ggdb main.cpp ./src/*.cpp -o main -I./include `pkg-config --cflags --libs opencv4`

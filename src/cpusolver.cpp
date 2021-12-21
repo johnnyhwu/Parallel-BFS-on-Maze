@@ -1,5 +1,6 @@
 #include "cpusolver.hpp"
 #include "pthread.h"
+#include "omp.h"
 #include "cell.hpp"
 #include <unistd.h>
 #include <iostream>
@@ -17,8 +18,10 @@ void CPUSolver::solve(unsigned int type, unsigned int thread_num) {
         serialBFS();
     } else if(type == 1) {
         parallelBFS1(thread_num);
-    } else {
+    } else if(type == 2) {
         parallelBFS2(thread_num);
+    } else {
+        parallelBFS3(thread_num);
     }
 }
 
@@ -532,5 +535,167 @@ void* CPUSolver::parallelBFS2Fn(void* argss) {
 
         // barrier
         pthread_barrier_wait(args->barrier2);
+    }
+}
+
+
+
+
+
+struct threadArgs3
+{
+    int id;
+
+    Cell** q1;
+    int* q1_size;
+
+    Cell** q2;
+    int* q2_size;
+
+    int* visited;
+    bool* is_end;
+
+    int height;
+    int width;
+    vector< vector<Cell> >* maze;
+};
+
+
+// parallel BFS with two queue (openmp); synchronize with atomic operation
+void CPUSolver::parallelBFS3(unsigned int thread_num) {
+
+    // initialization
+    Cell** q1 = new Cell* [height*width];
+    int q1_size = 0;
+    Cell** q2 = new Cell* [height*width];
+    int q2_size = 0;
+    int* visited = new int [height*width];
+    for(int i=0; i<height*width; i++) {
+        visited[i] = 0;
+    }
+
+    // thread initalization
+    bool is_end = false;
+
+    threadArgs3 args_template;
+    
+    args_template.q1 = q1;
+    args_template.q1_size = &q1_size;
+    
+    args_template.q2 = q2;
+    args_template.q2_size = &q2_size;
+
+    args_template.visited = visited;
+    args_template.is_end = &is_end;
+
+    args_template.height = height;
+    args_template.width = width;
+    args_template.maze = &maze;
+
+    // visit start point
+    maze[0][0].setFrom(Cell(0, 0));
+    q1[0] = &(maze[0][0]);
+    q1_size++;
+    visited[0] = true;
+
+    parallelBFS3Fn(&args_template, thread_num);
+}
+
+void CPUSolver::parallelBFS3Fn(void* argss, unsigned int thread_num) {
+    
+    threadArgs3* args = (threadArgs3*) argss;
+
+    while (true)
+    {
+        int temp_size = *(args->q1_size);
+
+        #pragma omp parallel for schedule(static, 1) num_threads(thread_num)
+        for(int i=0; i<temp_size; i++) {
+
+            Cell* current_cell;
+            int current_row;
+            int current_col;
+
+            int neighbor_row;
+            int neighbor_col;
+            int neighbor_idx;
+
+            current_cell = args->q1[i];
+            current_row = current_cell->getRowPos();
+            current_col = current_cell->getColPos();
+
+            int openmp_id = omp_get_thread_num();
+
+            // args->render->drawPath(current_cell->getFrom(), *current_cell);
+
+            if(current_row == args->height-1 && current_col == args->width-1) {
+                *(args->is_end) = true;
+                continue;
+            }
+
+            vector<bool>  neighbors = current_cell->getNeighbors();
+
+            // top
+            if(neighbors[0]) {
+                neighbor_row = current_row - 1;
+                neighbor_col = current_col;
+                neighbor_idx = neighbor_row * args->width + neighbor_col;
+
+                if( __sync_fetch_and_add(&(args->visited[neighbor_idx]), 1) == 0) {
+                    args->maze->at(neighbor_row).at(neighbor_col).setFrom(*current_cell);
+                    int idx = __sync_fetch_and_add(args->q2_size, 1);
+                    args->q2[idx] = &(args->maze->at(neighbor_row).at(neighbor_col));
+                }
+            }
+
+            // right
+            if(neighbors[1]) {
+                neighbor_row = current_row;
+                neighbor_col = current_col + 1;
+                neighbor_idx = neighbor_row * args->width + neighbor_col;
+
+                if( __sync_fetch_and_add(&(args->visited[neighbor_idx]), 1) == 0) {
+                    args->maze->at(neighbor_row).at(neighbor_col).setFrom(*current_cell);
+                    int idx = __sync_fetch_and_add(args->q2_size, 1);
+                    args->q2[idx] = &(args->maze->at(neighbor_row).at(neighbor_col));
+                }
+            }
+
+            // bottom
+            if(neighbors[2]) {
+                neighbor_row = current_row + 1;
+                neighbor_col = current_col;
+                neighbor_idx = neighbor_row * args->width + neighbor_col;
+
+                if( __sync_fetch_and_add(&(args->visited[neighbor_idx]), 1) == 0) {
+                    args->maze->at(neighbor_row).at(neighbor_col).setFrom(*current_cell);
+                    int idx = __sync_fetch_and_add(args->q2_size, 1);
+                    args->q2[idx] = &(args->maze->at(neighbor_row).at(neighbor_col));
+                }
+            }
+
+            // left
+            if(neighbors[3]) {
+                neighbor_row = current_row;
+                neighbor_col = current_col - 1;
+                neighbor_idx = neighbor_row * args->width + neighbor_col;
+
+                if( __sync_fetch_and_add(&(args->visited[neighbor_idx]), 1) == 0) {
+                    args->maze->at(neighbor_row).at(neighbor_col).setFrom(*current_cell);
+                    int idx = __sync_fetch_and_add(args->q2_size, 1);
+                    args->q2[idx] = &(args->maze->at(neighbor_row).at(neighbor_col));
+                }
+            }
+        }
+
+        Cell** temp = args->q1;
+        args->q1 = args->q2;
+        args->q2 = temp;
+        *args->q1_size = *args->q2_size;
+        *args->q2_size = 0;
+
+        if(*(args->is_end)) {
+            return;
+        }
     }
 }
