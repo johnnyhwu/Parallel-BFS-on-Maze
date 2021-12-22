@@ -1,30 +1,32 @@
 NVCC=nvcc 
 CXX=g++
+
 CXXFLAGS=-I./include -std=c++14 -Wall -g -fPIC
 CXXFLAGS_CPU=-I./include -std=c++14 -Wall -g -fPIC -pthread -fopenmp
 CVCXXFLAGS=`pkg-config --cflags --libs opencv4`
-OBJDIR=objs
+
 OBJDIR_GPU=objs/gpu
 OBJDIR_CPU=objs/cpu
+OBJDIR_OPENCV=render/objs
+
 SRCDIR=src
+
 
 CUDA_LINK_FLAGS =  -rdc=true -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC'
 CUDA_COMPILE_FLAGS = -I./include --device-c -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC' -g -O3
 
 # g++ -std=c++14 -ggdb main.cpp ./src/*.cpp -o main -I./include `pkg-config --cflags --libs opencv4`
 
-
-all: bfs_boosting
 cpu: bfs_cpu
 gpu: bfs_gpu
+vis: opencv
 
-OBJS= $(OBJDIR)/board.o $(OBJDIR)/cell.o $(OBJDIR)/cpusolver.o $(OBJDIR)/gpusolver.o $(OBJDIR)/kernel.o $(OBJDIR)/kruskal.o $(OBJDIR)/maze.o $(OBJDIR)/wall.o $(OBJDIR)/main.o
 OBJS_CPU= $(OBJDIR_CPU)/board.o $(OBJDIR_CPU)/cell.o $(OBJDIR_CPU)/cpusolver.o $(OBJDIR_CPU)/kruskal.o $(OBJDIR_CPU)/maze.o $(OBJDIR_CPU)/wall.o $(OBJDIR_CPU)/main_cpu.o
 OBJS_GPU= $(OBJDIR_GPU)/board.o $(OBJDIR_GPU)/cell.o $(OBJDIR_GPU)/gpusolver.o $(OBJDIR_GPU)/kernel.o $(OBJDIR_GPU)/kruskal.o $(OBJDIR_GPU)/maze.o $(OBJDIR_GPU)/wall.o $(OBJDIR_GPU)/main_gpu.o
+OBJS_OPENCV = $(OBJDIR_OPENCV)/board.o $(OBJDIR_OPENCV)/cell.o $(OBJDIR_OPENCV)/cpusolver.o $(OBJDIR_OPENCV)/
 
-bfs_boosting: $(OBJS)
-	$(NVCC) $(CUDA_LINK_FLAGS) -o $@ $(OBJS)
 
+opencv: $(OBJS_OPENCV)
 
 
 
@@ -40,9 +42,6 @@ $(OBJDIR_CPU)/%.o: $(SRCDIR)/%.cpp
 
 clean_cpu:
 	rm -rf $(OBJDIR_CPU)/*.o bfs_cpu
-
-
-
 
 
 

@@ -1,8 +1,8 @@
 #include "cpusolver.hpp"
 #include "pthread.h"
+#include "render.hpp"
 #include "omp.h"
 #include "cell.hpp"
-#include <unistd.h>
 #include <atomic>
 #include <iostream>
 #include <vector>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-CPUSolver::CPUSolver(vector< vector<Cell> > allCells, int height, int width/*, Render & render*/):maze(allCells), height(height), width(width)/*, render(render)*/ {}
+CPUSolver::CPUSolver(vector< vector<Cell> > allCells, int height, int width, Render & render):maze(allCells), height(height), width(width), render(render) {}
 
 CPUSolver::~CPUSolver() {}
 
@@ -48,7 +48,7 @@ void CPUSolver::serialBFS() {
         current_cell = q.front();
         q.pop();
 
-        // render.drawPath(current_cell.getFrom(), current_cell);
+        render.drawPath(current_cell.getFrom(), current_cell);
 
         if(current_cell.getRowPos() == height-1 && current_cell.getColPos() == width-1) {
             break;

@@ -1,5 +1,5 @@
 #include "cell.hpp"
-// #include "render.hpp"
+#include "render.hpp"
 #include <vector>
 
 using namespace std;
@@ -10,9 +10,9 @@ private:
     vector< vector<Cell> > maze;
     int height;
     int width;
-    // Render & render;
+    Render & render;
 public:
-    CPUSolver(vector< vector<Cell> > allCells, int height, int width/*, Render & render*/);
+    CPUSolver(vector< vector<Cell> > allCells, int height, int width, Render & render);
     ~CPUSolver();
     void solve(unsigned int type, unsigned int thread_num);
     void serialBFS();
