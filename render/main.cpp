@@ -10,7 +10,7 @@ using namespace chrono;
 
 int main(int argc, char* argv[]) {
     
-    if(argc != 10) {
+    if(argc != 5) {
         cout << "Command format error: " << endl;
         cout << "-h: height" <<endl;
         cout << "-w: width" <<endl;
@@ -22,15 +22,15 @@ int main(int argc, char* argv[]) {
     unsigned int height = atoi(argv[2]);
     unsigned int width = atoi(argv[4]);
     int render_constant = 5;
+    Render render = Render(height, width, render_constant);
     
 
     // generate maze
     cout << "Initialize maze (" << height << "x" << width << ")" <<endl; 
-    Maze maze = Maze(height, width);
+    Maze maze = Maze(height, width, render);
 
     // render maze
-    Render render = Render(height, width, render_constant);
-    render.drawMaze(maze.getBoardCells());
+    // render.drawMaze(maze.getBoardCells());
 
     CPUSolver cpu_solver = CPUSolver(maze.getBoardCells(), height, width, render);
     cpu_solver.solve(0, 0);

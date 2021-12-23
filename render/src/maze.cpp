@@ -1,11 +1,12 @@
 #include "maze.hpp"
+#include "render.hpp"
 #include <iostream>
 
 using namespace std;
 
-Maze::Maze(unsigned int height, unsigned int width):board(height, width)
+Maze::Maze(unsigned int height, unsigned int width, Render & render):board(height, width), render(render)
 {
-    kruskal.randomMST(board, width, height);
+    kruskal.randomMST(board, width, height, render);
 }
 
 Maze::~Maze() {}

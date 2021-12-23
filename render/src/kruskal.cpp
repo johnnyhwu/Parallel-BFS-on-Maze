@@ -1,4 +1,5 @@
 #include "kruskal.hpp"
+#include "render.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -8,7 +9,7 @@ Kruskal::Kruskal() {}
 
 Kruskal::~Kruskal() {}
 
-void Kruskal::randomMST(Board & board, unsigned int width, unsigned int height) {
+void Kruskal::randomMST(Board & board, unsigned int width, unsigned int height, Render & render) {
 
     // random shuffle all walls(edge) in board
     vector<Wall> & walls = board.getWalls();
@@ -38,6 +39,7 @@ void Kruskal::randomMST(Board & board, unsigned int width, unsigned int height) 
         if(set1 != set2) {
             unionSet(idx1, set1, idx2, set2);
             cell1.addNeighbor(cell2);
+            render.drawRoute(cell1, cell2);
             cell2.addNeighbor(cell1);
         }
     }

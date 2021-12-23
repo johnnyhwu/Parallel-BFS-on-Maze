@@ -3,11 +3,9 @@ CXX=g++
 
 CXXFLAGS=-I./include -std=c++14 -Wall -g -fPIC
 CXXFLAGS_CPU=-I./include -std=c++14 -Wall -g -fPIC -pthread -fopenmp
-CVCXXFLAGS=`pkg-config --cflags --libs opencv4`
 
 OBJDIR_GPU=objs/gpu
 OBJDIR_CPU=objs/cpu
-OBJDIR_OPENCV=render/objs
 
 SRCDIR=src
 
@@ -15,20 +13,12 @@ SRCDIR=src
 CUDA_LINK_FLAGS =  -rdc=true -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC'
 CUDA_COMPILE_FLAGS = -I./include --device-c -gencode=arch=compute_61,code=sm_61 -Xcompiler '-fPIC' -g -O3
 
-# g++ -std=c++14 -ggdb main.cpp ./src/*.cpp -o main -I./include `pkg-config --cflags --libs opencv4`
 
 cpu: bfs_cpu
 gpu: bfs_gpu
-vis: opencv
 
 OBJS_CPU= $(OBJDIR_CPU)/board.o $(OBJDIR_CPU)/cell.o $(OBJDIR_CPU)/cpusolver.o $(OBJDIR_CPU)/kruskal.o $(OBJDIR_CPU)/maze.o $(OBJDIR_CPU)/wall.o $(OBJDIR_CPU)/main_cpu.o
 OBJS_GPU= $(OBJDIR_GPU)/board.o $(OBJDIR_GPU)/cell.o $(OBJDIR_GPU)/gpusolver.o $(OBJDIR_GPU)/kernel.o $(OBJDIR_GPU)/kruskal.o $(OBJDIR_GPU)/maze.o $(OBJDIR_GPU)/wall.o $(OBJDIR_GPU)/main_gpu.o
-OBJS_OPENCV = $(OBJDIR_OPENCV)/board.o $(OBJDIR_OPENCV)/cell.o $(OBJDIR_OPENCV)/cpusolver.o $(OBJDIR_OPENCV)/
-
-
-opencv: $(OBJS_OPENCV)
-
-
 
 
 bfs_cpu: $(OBJS_CPU)

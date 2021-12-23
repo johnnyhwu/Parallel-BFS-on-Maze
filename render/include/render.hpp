@@ -21,6 +21,7 @@ public:
     void drawLine(vector<int> point1, vector<int> point2, bool is_path);
     void drawMaze(vector< vector<Cell> > allCells);
     void drawPath(Cell cell1, Cell cell2) ;
+    void drawRoute(Cell cell1, Cell cell2) ;
 
     cv::Mat & getMat();
 };

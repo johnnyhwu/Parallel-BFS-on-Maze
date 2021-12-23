@@ -11,7 +11,7 @@
 __global__ void bfsKernel(int* current_queue, int* next_queue, int* current_queue_counter, int* next_queue_counter, \
                             int* d_node, int* d_edge, int* visited, int size, int num_edge, int destination, int* flag) {
 
-    int index =  blockIdx.x * blockDim.x  + threadIdx.x;
+    int index =  blockIdx.x * blockDim.x  + threadIdx.x; 
     
     if(index < *current_queue_counter) {
         int cell = current_queue[index];
@@ -73,6 +73,7 @@ void hostFE(int* node, int* edge, int num_edge, int height, int width) {
     q1_counter = (int*)malloc(sizeof(int));
     q2_counter = (int*)malloc(sizeof(int));
     counter_reset = (int*)malloc(sizeof(int));
+    cudaHostAlloc(&counter_reset, sizeof(int), cudaHostAllocDefault);
     flag = (int*)malloc(sizeof(int));
     for(int i = 0; i < size; i ++) {
         v_tmp[i] = 0;
@@ -100,12 +101,10 @@ void hostFE(int* node, int* edge, int num_edge, int height, int width) {
     int thread_per_block = 1024;
     int block_per_grid = size/thread_per_block; 
     int* next_counter_ptr = (int*)malloc(sizeof(int));
-    int* next_q = (int*)malloc(sizeof(int) * size);
     *next_counter_ptr = 1;
     printf("Size of matrix %d\n", size);
 
     while(*next_counter_ptr > 0) {
-        // printf("Level: %d Flag: %d q1: %d q2: %d\n", level, *flag, *q1_counter, *q2_counter);
         if(level % 2 == 0) {
 
             cudaMemcpy(d_q2_counter, counter_reset, sizeof(int), cudaMemcpyHostToDevice);

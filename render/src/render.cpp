@@ -1,5 +1,6 @@
 #include "render.hpp"
 #include <vector>
+#include <opencv2/opencv.hpp>
 #include <iostream>
 
 using namespace std;
@@ -62,6 +63,19 @@ void Render::drawPath(Cell cell1, Cell cell2) {
     int y2 = int(cell2.getRowPos()) * render_constant;
 
     drawLine(vector<int>{x1, y1}, vector<int>{x2, y2}, true);
+
+    cv::imshow("Maze", mat);
+    cv::waitKey(1);
+}
+
+void Render::drawRoute(Cell cell1, Cell cell2) {
+    int x1 = int(cell1.getColPos()) * render_constant;
+    int y1 = int(cell1.getRowPos()) * render_constant;
+
+    int x2 = int(cell2.getColPos()) * render_constant;
+    int y2 = int(cell2.getRowPos()) * render_constant;
+
+    drawLine(vector<int>{x1, y1}, vector<int>{x2, y2}, false);
 
     cv::imshow("Maze", mat);
     cv::waitKey(1);
