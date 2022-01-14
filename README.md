@@ -25,15 +25,14 @@ After execution, 3 outputs will be shown.
 
 **Files Explaination**
 * main_gpu.cpp
-    * Retrieve the height and the width of maze
+    * Retrieve the height and the width of maze.
 * gpusolver.cpp
-    * Convert the maze into a compact adjacency list form
+    * Convert the maze into a compact adjacency list form.
 * gpusolver.hpp
-    * Contain the host frontend function which move data from host memory to device memory
-    * Contain the kernel function which process the each node of the graph for each thread in the GPU
+    * Contain the host frontend function which move data from host memory to device memory and this is where the kernel function is called.
+    * Contain the kernel function which processes each node of the graph for each thread in the GPU.
 * gpusolver.hpp
-    * of prototype of ```gpusolver```  
-
+    * Prototype of ```gpusolver```  
 
 
 
